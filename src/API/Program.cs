@@ -1,24 +1,42 @@
+using API.Data;
+using API.DataLoaders;
+using API.Services;
 using API.Types;
-using HotChocolate.AspNetCore.Voyager;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Observability/health from ServiceDefaults
-builder.Services.AddServiceDefaults();
+// (Optional) if you have Aspire ServiceDefaults:
+// builder.Services.AddServiceDefaults();
 
-// GraphQL schema
+builder.Services.AddSingleton<InMemoryStore>();
+builder.Services.AddSingleton<BookService>();
+builder.Services.AddDataLoader<AuthorByIdDataLoader>();
+
+// GraphQL server
 builder.Services
     .AddGraphQLServer()
-    .AddQueryType<Query>();
+    .AddQueryType<Query>()
+    .AddMutationType<Mutation>()
+    .AddSubscriptionType<Subscription>()
+    .AddType<BookResolvers>()           // attach Book -> Author resolver
+    .AddProjections()
+    .AddFiltering()
+    .AddSorting()
+    .AddInMemorySubscriptions();
 
 var app = builder.Build();
-app.UseRouting();
-app.UseServiceDefaults();
 
-// GraphQL endpoint + Banana Cake Pop UI at /graphql
-app.MapGraphQL("/graphql");
+// (Optional) Aspire defaults:
+// app.UseServiceDefaults();
 
-// Optional: Voyager schema explorer at /voyager
-app.UseVoyager("/graphql", "/voyager");
+app.UseWebSockets();           // required for subscriptions
+app.MapGraphQL("/graphql");    // Banana Cake Pop UI at this path
+
+// Seed data once per run
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<InMemoryStore>();
+    Seed.EnsureSeeded(db);
+}
 
 app.Run();

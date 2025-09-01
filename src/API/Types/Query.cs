@@ -1,7 +1,24 @@
+using API.Models;
+using API.Services;
+using API.DataLoaders;
+using HotChocolate.Data;
+
 namespace API.Types;
+
 public class Query
 {
-    public string Hello() => "Hello from Aspire + GraphQL 👋";
-    public Weather TodayWeather() => new("London", 21, "Partly Cloudy");
+    [UsePaging(IncludeTotalCount = true)]
+    [UseProjection]
+    [UseFiltering]
+    [UseSorting]
+    public IQueryable<Book> GetBooks([Service] BookService svc) => svc.QueryBooks();
+
+    [UseFiltering, UseSorting]
+    public IQueryable<Author> GetAuthors([Service] BookService svc) => svc.QueryAuthors();
+
+    [UseFiltering, UseSorting]
+    public IQueryable<Review> GetReviews([Service] BookService svc) => svc.QueryReviews();
+
+    public async Task<Author?> GetAuthorByIdAsync(Guid id, AuthorByIdDataLoader loader, CancellationToken ct)
+        => await loader.LoadAsync(id, ct);
 }
-public record Weather(string City, int TempC, string Summary);
