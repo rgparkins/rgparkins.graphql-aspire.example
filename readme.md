@@ -1,7 +1,3 @@
-Here’s a polished **README.md** you can drop straight into your GitHub repo for the complex .NET Aspire GraphQL project we just built. It explains setup, running, and usage with clear sections.
-
----
-
 # GraphQL Aspire Demo
 
 This project is a **.NET 9 Aspire application** demonstrating a **GraphQL API** using [Hot Chocolate](https://chillicream.com/docs/hotchocolate/). It includes features such as queries with paging/filtering/sorting, mutations with validation, subscriptions, and in-memory data storage with seed data.
@@ -122,7 +118,3 @@ subscription {
 * Swap the in-memory store for EF Core + a real database
 * Add authentication/authorization with `HotChocolate.AspNetCore.Authorization`
 * Integrate OpenTelemetry exporters in `ServiceDefaults` for end-to-end tracing
-
----
-
-Would you like me to also create a **Contributing section** with developer workflow (branching, pull requests, coding standards), so this looks like a proper open-source repo?
