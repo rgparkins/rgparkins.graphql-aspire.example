@@ -3,40 +3,46 @@ using API.DataLoaders;
 using API.Services;
 using API.Types;
 
-var builder = WebApplication.CreateBuilder(args);
+public class Program
+{
+    public static void Main(string[] args)
+    {
+        var builder = WebApplication.CreateBuilder(args);
 
 // (Optional) if you have Aspire ServiceDefaults:
 // builder.Services.AddServiceDefaults();
 
-builder.Services.AddSingleton<InMemoryStore>();
-builder.Services.AddSingleton<BookService>();
-builder.Services.AddDataLoader<AuthorByIdDataLoader>();
+        builder.Services.AddSingleton<InMemoryStore>();
+        builder.Services.AddSingleton<BookService>();
+        builder.Services.AddDataLoader<AuthorByIdDataLoader>();
 
 // GraphQL server
-builder.Services
-    .AddGraphQLServer()
-    .AddQueryType<Query>()
-    .AddMutationType<Mutation>()
-    .AddSubscriptionType<Subscription>()
-    .AddType<BookResolvers>()           // attach Book -> Author resolver
-    .AddProjections()
-    .AddFiltering()
-    .AddSorting()
-    .AddInMemorySubscriptions();
+        builder.Services
+            .AddGraphQLServer()
+            .AddQueryType<Query>()
+            .AddMutationType<Mutation>()
+            .AddSubscriptionType<Subscription>()
+            .AddType<BookResolvers>() // attach Book -> Author resolver
+            .AddProjections()
+            .AddFiltering()
+            .AddSorting()
+            .AddInMemorySubscriptions();
 
-var app = builder.Build();
+        var app = builder.Build();
 
 // (Optional) Aspire defaults:
 // app.UseServiceDefaults();
 
-app.UseWebSockets();           // required for subscriptions
-app.MapGraphQL("/graphql");    // Banana Cake Pop UI at this path
+        app.UseWebSockets(); // required for subscriptions
+        app.MapGraphQL(path: "/");
 
 // Seed data once per run
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<InMemoryStore>();
-    Seed.EnsureSeeded(db);
-}
+        using (var scope = app.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<InMemoryStore>();
+            Seed.EnsureSeeded(db);
+        }
 
-app.Run();
+        app.Run();
+    }
+}
